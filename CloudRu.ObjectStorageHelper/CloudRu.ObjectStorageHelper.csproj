@@ -4,7 +4,28 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>ObjectStorageHelperForCloudRu</Title>
+    <Authors>algmironov</Authors>
+    <Description>CloudRu.ObjectStorageHelper is an unofficial simple library for interacting with object storage service of Cloud.ru
+Uses AWSSDK.S3 library</Description>
+    <Copyright>MIT</Copyright>
+    <RepositoryUrl>https://github.com/algmironov/CloudRu.ObjectStorageHelper</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>s3; cloudru; object storage;</PackageTags>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
+    <FileVersion>1.0.0</FileVersion>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AWSSDK.S3" Version="3.7.310.7" />
