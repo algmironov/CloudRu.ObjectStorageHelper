@@ -15,9 +15,15 @@ ObjectStorageService - это .NET библиотека для удобного 
 
 Установите пакет ObjectStorageService через NuGet Package Manager:
 
+```
+NuGet\Install-Package CloudRu.ObjectStorageHelper -Version 1.0.0
+```
 
 Или через .NET CLI:
 
+```
+dotnet add package CloudRu.ObjectStorageHelper --version 1.0.0
+```
 
 ## Использование
 
@@ -78,5 +84,6 @@ await service.DeleteFileAsync("my-folder", "file.txt");
 
 ## Благодарности
 
-Спасибо команде [Cloud.ru](https://cloud.ru) за отличный сервис Object Storage
+Спасибо команде [Cloud.ru](https://cloud.ru) за отличный сервис Object Storage.
+
 Библиотека использует [AWSSDK.S3](https://www.nuget.org/packages/AWSSDK.S3) для взаимодействия с S3-совместимым API
