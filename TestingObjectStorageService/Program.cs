@@ -1,10 +1,13 @@
-﻿using SimpleLogger;
-using CloudRu.ObjectStorageHelper;
-using Amazon.S3.Model;
-using Amazon.Runtime.SharedInterfaces;
+﻿using CloudRu.ObjectStorageHelper;
+using SimpleLogger;
+
+
 
 namespace TestingObjectStorageService
 {
+
+
+
     internal class Program
     {
         static async Task Main(string[] args)
@@ -16,11 +19,14 @@ namespace TestingObjectStorageService
 
             var logger = new Logger();
 
-            var objStorage = new ObjectStorageService("b6307ba7-3a26-4a17-9c25-969fe7c90b5c:8ce22f6e06ef822c0855cc5ca618f4a6", "ad1d26d43ca225af1ada9ccc171e29f5", "mac-bot-cards", options);
+            var objStorage = new ObjectStorageService(
+                                        accessKey: "b6307ba7-3a26-4a17-9c25-969fe7c90b5c:8ce22f6e06ef822c0855cc5ca618f4a6", 
+                                        secretKey: "ad1d26d43ca225af1ada9ccc171e29f5",
+                                        bucketName: "mac-bot-cards");
 
             var folders = await objStorage.ListFoldersAsync();
 
-            Console.WriteLine(":Folders: ");
+            Console.WriteLine("Folders: ");
 
             foreach (var folder in folders)
             {
@@ -41,6 +47,7 @@ namespace TestingObjectStorageService
 
             var folderName = folders[0];
             var filesInFolder = await objStorage.ListFilesInFolderAsync(folderName);
+
             /**
             try
             {
@@ -58,6 +65,9 @@ namespace TestingObjectStorageService
                 logger.Error("Возникла ошибка при переименовании файла ", ex);
             }
             **/
+
+
+
         }
     }
 }
