@@ -28,7 +28,7 @@ Uses AWSSDK.S3 library</Description>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.S3" Version="3.7.310.7" />
+    <PackageReference Include="AWSSDK.S3" Version="4.0.0-preview.4" />
     <PackageReference Include="SimpleLoggerByAlgmironov" Version="1.1.2" />
   </ItemGroup>
 

@@ -1,11 +1,10 @@
-﻿using Amazon.Runtime.Internal.Util;
-using Amazon.S3.Model;
+﻿using Amazon.Runtime;
 using Amazon.S3;
+using Amazon.S3.Model;
+
 using SimpleLogger;
+
 using Logger = SimpleLogger.Logger;
-using Amazon.Runtime;
-using Amazon.Internal;
-using Amazon;
 
 namespace CloudRu.ObjectStorageHelper
 {
@@ -16,17 +15,50 @@ namespace CloudRu.ObjectStorageHelper
     public class ObjectStorageService
     {
         private readonly AmazonS3Client _s3Client;
-        private readonly Logger _logger;
-        private string _bucketName;
+        private readonly Logger? _logger;
+        private readonly string _bucketName;
+        private readonly bool _useLogger;
+
+        #region CTORs
 
         /// <summary>
         /// Инициализирует новый экземпляр класса ObjectStorageService.
         /// </summary>
-        /// <param name="accessKey">Ключ доступа для сервиса Object Storage.</param>
-        /// <param name="secretKey">Секретный ключ для сервиса Object Storage.</param>
+        /// <param name="client">Объект <see cref="AmazonS3Client"/></param>
         /// <param name="bucketName">Имя бакета по умолчанию.</param>
         /// <exception cref="ArgumentNullException">Выбрасывается, если какой-либо из параметров null или пустой.</exception>
-        public ObjectStorageService(string accessKey, string secretKey, string bucketName)
+        public ObjectStorageService(AmazonS3Client client, string bucketName)
+        {
+            _s3Client = client;
+            _bucketName = bucketName;
+            _useLogger = false;
+        }
+
+        /// <summary>
+        /// Инициализирует новый экземпляр класса ObjectStorageService.
+        /// </summary>
+        /// <param name="client">Объект <see cref="AmazonS3Client"/></param>
+        /// <param name="bucketName">Имя бакета по умолчанию.</param>
+        /// <param name="options">Параметры <see cref="SimpleLoggerOptions"/> для включения логирования</param>
+        /// <exception cref="ArgumentNullException">Выбрасывается, если какой-либо из параметров null или пустой.</exception>
+        public ObjectStorageService(AmazonS3Client client, string bucketName, SimpleLoggerOptions options)
+        {
+            _s3Client = client;
+            _bucketName = bucketName;
+            _useLogger = true;
+            _logger = new Logger(options);
+        }
+
+
+        /// <summary>
+        /// Инициализирует новый экземпляр класса ObjectStorageService.
+        /// </summary>
+        /// <param name="accessKey">Ключ доступа для сервиса Object Storage. Состоит из строки вида: "Your_Tenant_ID:Your_Access_Key_ID" </param>
+        /// <param name="secretKey">Секретный ключ для сервиса Object Storage.</param>
+        /// <param name="bucketName">Имя бакета по умолчанию.</param>
+        /// <param name="serviceUrl">URL сервиса Object Storage. Использует дефолтное url от Cloud.ru, но в случае изменения можно указать другое значение</param>
+        /// <exception cref="ArgumentNullException">Выбрасывается, если какой-либо из параметров null или пустой.</exception>
+        public ObjectStorageService(string accessKey, string secretKey, string bucketName, string serviceUrl = "https://s3.cloud.ru")
         {
             if (string.IsNullOrEmpty(accessKey)) throw new ArgumentNullException(nameof(accessKey));
             if (string.IsNullOrEmpty(secretKey)) throw new ArgumentNullException(nameof(secretKey));
@@ -34,33 +66,31 @@ namespace CloudRu.ObjectStorageHelper
 
             var config = new AmazonS3Config
             {
-                ServiceURL = "https://s3.cloud.ru",
+                AuthenticationRegion = "ru-central-1",
+                ServiceURL = serviceUrl,
                 SignatureVersion = "4",
                 SignatureMethod = SigningAlgorithm.HmacSHA256,
-                ForcePathStyle = true
+                ForcePathStyle = true,
             };
 
             _s3Client = new AmazonS3Client(accessKey, secretKey, config);
+
             _bucketName = bucketName;
 
-            var loggerOptions = new SimpleLoggerOptions
-            {
-                Folder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ObjectStorageLogs"),
-                LoggingType = LoggingType.FileOnly
-            };
-            _logger = new Logger(loggerOptions);
+            _useLogger = false;
+
         }
 
         /// <summary>
         /// Инициализирует новый экземпляр класса ObjectStorageService.
         /// </summary>
-        /// <param name="accessKey">Ключ доступа для сервиса Object Storage.</param>
+        /// <param name="accessKey">Ключ доступа для сервиса Object Storage. Состоит из строки вида: "Your_Tenant_ID:Your_Access_Key_ID" </param>
         /// <param name="secretKey">Секретный ключ для сервиса Object Storage.</param>
-        /// <param name="serviceUrl">URL сервиса Object Storage.</param>
+        /// <param name="serviceUrl">URL сервиса Object Storage. Использует дефолтное url от Cloud.ru, но в случае изменения можно указать другое значение</param>
         /// <param name="bucketName">Имя бакета по умолчанию.</param>
         /// <param name="options" cref="SimpleLoggerOptions">Параметры логирования</param>
         /// <exception cref="ArgumentNullException">Выбрасывается, если какой-либо из параметров null или пустой.</exception>
-        public ObjectStorageService(string accessKey, string secretKey, string bucketName, SimpleLoggerOptions options)
+        public ObjectStorageService(string accessKey, string secretKey, string bucketName, SimpleLoggerOptions options, string serviceUrl = "https://s3.cloud.ru")
         {
             if (string.IsNullOrEmpty(accessKey)) throw new ArgumentNullException(nameof(accessKey));
             if (string.IsNullOrEmpty(secretKey)) throw new ArgumentNullException(nameof(secretKey));
@@ -68,15 +98,25 @@ namespace CloudRu.ObjectStorageHelper
 
             var config = new AmazonS3Config
             {
-                ServiceURL = "https://s3.cloud.ru",
+                AuthenticationRegion = "ru-central-1",
+                SignatureVersion = "4",
+                SignatureMethod = SigningAlgorithm.HmacSHA256,
+                ServiceURL = serviceUrl,
                 ForcePathStyle = true
             };
 
             _s3Client = new AmazonS3Client(accessKey, secretKey, config);
             _bucketName = bucketName;
 
+
             _logger = new Logger(options);
+            _useLogger = true;
+
         }
+
+        #endregion
+
+        #region Operations
 
         /// <summary>
         /// Создает новую папку в текущем бакете.
@@ -86,20 +126,24 @@ namespace CloudRu.ObjectStorageHelper
         /// <exception cref="AmazonS3Exception">Выбрасывается при ошибке создания папки.</exception>
         public async Task CreateFolderAsync(string folderName)
         {
+
             await ExecuteS3OperationAsync(async () =>
-            {
-                var request = new PutObjectRequest
                 {
-                    BucketName = _bucketName,
-                    Key = folderName.TrimEnd('/') + "/",
-                    ContentBody = string.Empty
-                };
-                await _s3Client.PutObjectAsync(request);
-            }, $"Возникла ошибка при создании папки {folderName}");
+                    var request = new PutObjectRequest
+                    {
+                        BucketName = _bucketName,
+                        Key = folderName.TrimEnd('/') + "/",
+                        ContentBody = string.Empty
+                    };
+                    await _s3Client.PutObjectAsync(request);
+                }, $"Возникла ошибка при создании папки {folderName}");
+
         }
 
         /// <summary>
         /// Переименовывает папку в текущем бакете.
+        /// 
+        /// Поскольку S3 API не поддерживает непосредственного переисенования папки в облаке, все файлы из нее копируются в новую папку с новым именем, а по завершении операции старая папка удаляется.
         /// </summary>
         /// <param name="oldFolderName">Текущее имя папки.</param>
         /// <param name="newFolderName">Новое имя папки.</param>
@@ -114,6 +158,7 @@ namespace CloudRu.ObjectStorageHelper
                 {
                     var oldKey = obj;
                     var newKey = obj.Replace(oldFolderName, newFolderName);
+
                     await CopyObjectAsync(oldKey, newKey);
                     await DeleteObjectAsync(oldKey);
                 }
@@ -288,6 +333,7 @@ namespace CloudRu.ObjectStorageHelper
                 };
                 await _s3Client.DeleteObjectAsync(request);
             }, $"Возникла ошибка при удалении объекта {key}");
+
         }
 
         /// <summary>
@@ -304,7 +350,11 @@ namespace CloudRu.ObjectStorageHelper
             }
             catch (Exception ex)
             {
-                _logger.Error(errorMessage, ex);
+                if (_useLogger)
+                {
+                    _logger!.Error(errorMessage, ex);
+                }
+
                 throw;
             }
         }
@@ -324,9 +374,14 @@ namespace CloudRu.ObjectStorageHelper
             }
             catch (Exception ex)
             {
-                _logger.Error(errorMessage, ex);
+                if (_useLogger)
+                {
+                    _logger!.Error(errorMessage, ex);
+                }
+
                 throw;
             }
         }
+        #endregion
     }
 }
