@@ -16,25 +16,44 @@ ObjectStorageService - это .NET библиотека для удобного 
 Установите пакет ObjectStorageService через NuGet Package Manager:
 
 ```
-NuGet\Install-Package CloudRu.ObjectStorageHelper -Version 1.0.0
+NuGet\Install-Package CloudRu.ObjectStorageHelper -Version 2.0.0
 ```
 
 Или через .NET CLI:
 
 ```
-dotnet add package CloudRu.ObjectStorageHelper --version 1.0.0
+dotnet add package CloudRu.ObjectStorageHelper --version 2.0.0
 ```
 
 ## Использование
 
 Вот пример базового использования библиотеки:
 
+### С помощью Builder() :
+```csharp
+
+var s3Client = new S3ClientBuilder()
+    .WithTenantId("YOUR_TENANT_ID") 
+    .WithAccessKey("YOUR_ACCESS_KEY")
+    .WithSecretKey("YOUR_SECRET_KEY")
+    .WithBucketName("YOUR_BUCKET_NAME")
+    .Build();
+
+var folders = await s3Client.ListFoldersAsync();
+
+foreach (var folder in folders)
+{
+    Console.WriteLine(folder);
+}
+
+```
+### С помощью конструктора :
 ```csharp
 using ObjectStorageService;
 
 // Инициализация сервиса
 var service = new ObjectStorageService(
-    "your_access_key",
+    "your_access_key", // здесь accessKey - это строка, состоящая из: <tenantId:accessKey>
     "your_secret_key",
     "your-bucket-name"
 );

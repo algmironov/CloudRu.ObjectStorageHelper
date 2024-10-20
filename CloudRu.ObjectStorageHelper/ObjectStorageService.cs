@@ -20,6 +20,36 @@ namespace CloudRu.ObjectStorageHelper
         private readonly bool _useLogger;
 
         #region CTORs
+
+        /// <summary>
+        /// Инициализирует новый экземпляр класса ObjectStorageService.
+        /// </summary>
+        /// <param name="client">Объект <see cref="AmazonS3Client"/></param>
+        /// <param name="bucketName">Имя бакета по умолчанию.</param>
+        /// <exception cref="ArgumentNullException">Выбрасывается, если какой-либо из параметров null или пустой.</exception>
+        public ObjectStorageService(AmazonS3Client client, string bucketName)
+        {
+            _s3Client = client;
+            _bucketName = bucketName;
+            _useLogger = false;
+        }
+
+        /// <summary>
+        /// Инициализирует новый экземпляр класса ObjectStorageService.
+        /// </summary>
+        /// <param name="client">Объект <see cref="AmazonS3Client"/></param>
+        /// <param name="bucketName">Имя бакета по умолчанию.</param>
+        /// <param name="options">Параметры <see cref="SimpleLoggerOptions"/> для включения логирования</param>
+        /// <exception cref="ArgumentNullException">Выбрасывается, если какой-либо из параметров null или пустой.</exception>
+        public ObjectStorageService(AmazonS3Client client, string bucketName, SimpleLoggerOptions options)
+        {
+            _s3Client = client;
+            _bucketName = bucketName;
+            _useLogger = true;
+            _logger = new Logger(options);
+        }
+
+
         /// <summary>
         /// Инициализирует новый экземпляр класса ObjectStorageService.
         /// </summary>
@@ -96,16 +126,18 @@ namespace CloudRu.ObjectStorageHelper
         /// <exception cref="AmazonS3Exception">Выбрасывается при ошибке создания папки.</exception>
         public async Task CreateFolderAsync(string folderName)
         {
+
             await ExecuteS3OperationAsync(async () =>
-            {
-                var request = new PutObjectRequest
                 {
-                    BucketName = _bucketName,
-                    Key = folderName.TrimEnd('/') + "/",
-                    ContentBody = string.Empty
-                };
-                await _s3Client.PutObjectAsync(request);
-            }, $"Возникла ошибка при создании папки {folderName}");
+                    var request = new PutObjectRequest
+                    {
+                        BucketName = _bucketName,
+                        Key = folderName.TrimEnd('/') + "/",
+                        ContentBody = string.Empty
+                    };
+                    await _s3Client.PutObjectAsync(request);
+                }, $"Возникла ошибка при создании папки {folderName}");
+
         }
 
         /// <summary>

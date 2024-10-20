@@ -1,4 +1,5 @@
 ﻿using CloudRu.ObjectStorageHelper;
+
 using SimpleLogger;
 
 
@@ -20,10 +21,26 @@ namespace TestingObjectStorageService
             var logger = new Logger();
 
             var objStorage = new ObjectStorageService(
-                                        accessKey: "b6307ba7-3a26-4a17-9c25-969fe7c90b5c:8ce22f6e06ef822c0855cc5ca618f4a6", 
+                                        accessKey: "b6307ba7-3a26-4a17-9c25-969fe7c90b5c:8ce22f6e06ef822c0855cc5ca618f4a6",
                                         secretKey: "ad1d26d43ca225af1ada9ccc171e29f5",
                                         bucketName: "mac-bot-cards");
 
+
+            var s3Client = new S3ClientBuilder()
+                .WithTenantId("b6307ba7-3a26-4a17-9c25-969fe7c90b5c")
+                .WithAccessKey("8ce22f6e06ef822c0855cc5ca618f4a6")
+                .WithSecretKey("ad1d26d43ca225af1ada9ccc171e29f5")
+                .WithBucketName("mac-bot-cards")
+                .Build();
+
+            var fldrs = await s3Client.ListFoldersAsync();
+
+            foreach (var fldr in fldrs)
+            {
+                Console.WriteLine(fldr);
+            }
+
+            /*
             var folders = await objStorage.ListFoldersAsync();
 
             Console.WriteLine("Folders: ");
@@ -35,7 +52,7 @@ namespace TestingObjectStorageService
 
             Console.WriteLine("Files: ");
 
-            foreach(var folder in folders)
+            foreach (var folder in folders)
             {
                 var files = await objStorage.ListFilesInFolderAsync(folder);
 
