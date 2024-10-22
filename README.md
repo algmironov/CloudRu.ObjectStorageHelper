@@ -1,8 +1,9 @@
 # CloudRu.ObjectStorageHelper
 
-# ObjectStorageService для Cloud.ru
+# ObjectStorageService для Cloud.ru и Yandex.Cloud
 
 ObjectStorageService - это .NET библиотека для удобного взаимодействия с Object Storage сервиса Cloud.ru. Библиотека предоставляет простой и интуитивно понятный интерфейс для выполнения основных операций с объектным хранилищем.
+> Может быть использована для Yandex Cloud
 
 ## Основные возможности
 
